@@ -7,9 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 public class MainActivity extends AppCompatActivity {
@@ -18,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
     Thread sendingDataThread;
     Handler sendingDataHandler;
 
-    String ipAddress = "tcp://172.30.1.60";
-    String topic = "Dabin";
+    String ipAddress = "tcp://172.30.1.4";
+    String topic = "pact/data2";
     private android.widget.TextView tvData;
 
     @Override
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         this.tvData = (TextView) findViewById(R.id.tvData);
 
         try {
-            client = new MqttClient(ipAddress, MqttClient.generateClientId(), new MemoryPersistence());
+            client = new MqttClient(ipAddress, client.generateClientId(), new MemoryPersistence());
             client.connect();
             sendingDataStart();
 
@@ -47,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
                     super.handleMessage(msg);
 
                     if (msg.what == 0) {
-                        for (int i = 0; i < 2048; i++) {
+                        for (int i = 0; i < 2049; i++) {
                             sendingData += (float) (Math.random() * 30f + 30f);
-                            if(i < 2047) sendingData += "/";
+                            if(i < 2048) sendingData += "/";
                         }
 //                        Log.d("sendingData", sendingData);
                         try {
@@ -58,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+
                                     tvData.setText(sendingData);
+
                                 }
                             });
                             sendingData = "";
@@ -79,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     if (sendingDataHandler != null)
                         sendingDataHandler.sendEmptyMessage(0);
                     try {
+
                         Thread.sleep(1000);
 
                     } catch (Exception e) {
@@ -86,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 }
-
             }
         });
 
