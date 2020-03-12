@@ -26,9 +26,7 @@ public class MainActivity extends AppCompatActivity {
     Thread sendingDataThread;
     Handler sendingDataHandler;
 
-    public final
-
-    String ipAddress = "tcp://172.30.1.38";
+    String ipAddress = "tcp://172.30.1.1";
     String topic = "pact/data2";
     private android.widget.TextView tvData;
 
@@ -48,23 +46,35 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void connectComplete(boolean reconnect, String serverURI) {
 
+                    runOnUiThread(() -> {
+                        tvData.setText("Connected!!");
+
+                    });
                 }
 
                 @Override
                 public void connectionLost(Throwable cause) {
+                    runOnUiThread(() -> {
+                        tvData.setText("Connection Lost...");
 
+                    });
                 }
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    if(new String(message.getPayload()).equals("0x200000")) {
+                    if (new String(message.getPayload()).equals("0x200000")) {
 
                         client.publish("pact/data1", new MqttMessage("0x200000".getBytes()));
                         Log.d("20000", "2000000");
 
-                    } else if(message.toString().equals("0x11")){
+                        runOnUiThread(() -> {
+                            tvData.setText("Connected!!");
 
-                        final ByteBuffer buffer = ByteBuffer.allocate(10000).order(ByteOrder.LITTLE_ENDIAN);
+                        });
+
+                    } else if (message.toString().equals("0x11")) {
+
+                        final ByteBuffer buffer = ByteBuffer.allocate(7000).order(ByteOrder.LITTLE_ENDIAN);
 
                         Log.d(topic, message.toString());
                         buffer.putInt(0x042);
@@ -73,15 +83,15 @@ public class MainActivity extends AppCompatActivity {
 
                         /*demodulation test*/
 
-                        for(int i=0; i<8; i++) {
+                        for (int i = 0; i < 8; i++) {
 
-                            int size = (int)(((Math.random() * 128)));
+                            int size = (int) (((Math.random() * 128)));
                             buffer.putInt(size);
 
-                            for(int k=0; k<size; k++) {
+                            for (int k = 0; k < size; k++) {
 
-                                buffer.putInt((int)(((Math.random() * 4) - 2) * 1000));
-                                buffer.putInt((int)(((Math.random() * 4) - 2) * 1000));
+                                buffer.putInt((int) (((Math.random() * 4) - 2) * 1000));
+                                buffer.putInt((int) (((Math.random() * 4) - 2) * 1000));
 
                             }
 
@@ -89,53 +99,21 @@ public class MainActivity extends AppCompatActivity {
 
                         }
 
-                        for(int i=0; i<8; i++) {
+                        for (int i = 0; i < 8; i++) {
 
-                            buffer.putInt((int)(Math.random() * -100 * 100));
-
-                        }
-
-                        for(int i=0; i<4; i++) {
-
-                            buffer.putShort((short)(Math.random() * 8));
-
-                        }
-
-                        buffer.putInt((int)(Math.random() * 8));
-
-                        for(int i=0; i<5; i++) {
-
-                            buffer.putShort((short)(Math.random() * 8));
-
-                        }
-
-                        for(int i=0; i<38; i++) {
-
-                            buffer.putInt((int)(Math.random() * 8));
+                            buffer.putInt((int) (Math.random() * -100 * 100));
 
                         }
 
 
+                        for (int i = 0; i < 47; i++) {
 
-//                        for(int j=0; j<4; j++) {
-//
-//                            for (int i = 0; i < 2002; i++) {
-//                                buffer.putInt((int) (-(Math.random() * 20f + (20f * j))) * 1000);
-//                            }
-//
-//                        }
+                            buffer.putInt((int) (Math.random() * 8));
 
-//                        for (int i = 0; i < 129; i++) {
-//                            buffer.putInt((int) ((Math.random() * 30f + 30f)) * 1000);
-//                        }
-//
-//                        buffer.putInt((int)(Math.random() * 9999));
-//                        buffer.putInt((int)(Math.random() * 9999));
-//                        buffer.putInt((int)(Math.random() * 9999));
-//                        buffer.putInt((int)(Math.random() * 10 + 1840) * 100);
-//                        buffer.putInt((int)(Math.random() * 10 + 1850) * 100);
+                        }
 
-                        Log.d("bufferSize", buffer.array().length + " ");
+
+                        Log.d("bufferSize", buffer.position() + " ");
 
                         try {
                             client.publish("pact/data2", new MqttMessage(buffer.array()));
@@ -165,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ByteBuffer buffer = ByteBuffer.allocate(4 * 129 + 8).order(ByteOrder.LITTLE_ENDIAN);
 
-        if(sendingDataHandler == null) {
+        if (sendingDataHandler == null) {
             sendingDataHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
