@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     int PartialCount = 1;
     int delay = 1000;
     private static ReentrantLock RL = new ReentrantLock();
-    String ipAddress = "tcp://172.30.1.50";
+    String ipAddress = "tcp://172.30.1.6";
     String topic = "pact/data2";
 
     enum MODE {
@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
         buffer.putInt(TotalCount);
         buffer.putInt(PartialCount);
 
-        Log.d("bufferSize", buffer.position() + " ");
+        Log.d("bufferSize", buffer.position() + " " + (40 - 32 / 2));
 
         try {
             client.publish("pact/data2", new MqttMessage(buffer.array()));
@@ -616,11 +616,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        for (int i = 0; i < 47; i++) {
+        for (int i = 0; i < 45; i++) {
 
             buffer.putInt((int) (Math.random() * 8));
 
         }
+
+        buffer.putInt((int) (Math.random() * 200000000));
+        buffer.putInt((int) (Math.random() * 200000000));
 
 
         Log.d("bufferSize", buffer.position() + " ");
